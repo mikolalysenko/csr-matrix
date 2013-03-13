@@ -1,0 +1,39 @@
+{
+  "name": "csr-matrix",
+  "version": "0.0.0",
+  "description": "Compressed sparse row matrix class",
+  "main": "csr.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "cwise": "~0.1.2"
+  },
+  "devDependencies": {
+    "tap": "~0.4.0"
+  },
+  "scripts": {
+    "test": "tap test/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mikolalysenko/csr-matrix.git"
+  },
+  "keywords": [
+    "matrix",
+    "sparse",
+    "compressed",
+    "sparse",
+    "row",
+    "incremental",
+    "vector",
+    "multiply",
+    "linear",
+    "algebra",
+    "math"
+  ],
+  "author": "Mikola Lysenko",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "gitHead": "595d6d25ee89a767157613562c59e6ff12567f58"
+}
