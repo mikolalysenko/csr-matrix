@@ -18,7 +18,7 @@ dict[[3,4]] = 5
 
 var CSRMatrix = require("csr-matrix")
 
-var M = CSRMatrix.fromDictionary(dict)
+var M = CSRMatrix.fromDictionary(dict, 4, 5)
 console.log(M.apply([1,2,3,4,5]))
 ```
 
@@ -32,6 +32,26 @@ This computes the normal matrix-vector product, but is often much faster than a 
 * `result` is an optional array which gets the result.  If not specified, a new vector gets allocated
 
 Returns the resulting product
+
+### `matrix.transpose()`
+Returns the transpose of the matrix
+
+### `matrix.rowCount`
+Returns the number of rows
+
+### `matrix.columnCount`
+
+### `matrix.toList()`
+Converts matrix into a list format
+
+### `matrix.toDictionary()`
+Converts matrix into hash table
+
+### `matrix.toDense()`
+Converts matrix into array of arrays
+
+### `matrix.toNDArray()`
+Converts matrix into ndarray
 
 ## Constructors
 There are several ways to create csr-matrices.  The most direct way to do this is to just call the constructor yourself:
@@ -47,10 +67,10 @@ Where:
 
 Calling this method directly is not advised.  Instead, you should use one of the more user-friendly constructors:
 
-### `CSRMatrix.fromList(items[, nrows])`
-Turns an array of entries of the form `[row, column, value]` into a sparse matrix.  Note that if there are some zero rows at the end of the matrix, you need to specify the number of rows in the nrows optional argument.
+### `CSRMatrix.fromList(items[, nrows, ncols])`
+Turns an array of entries of the form `[row, column, value]` into a sparse matrix.  Note that if there are some zero rows or columns at the end of the matrix, you need to specify the number of rows/columns in the optional nrows/ncols arguments.
 
-### `CSRMatrix.fromDictionary(dict[, nrows])`
+### `CSRMatrix.fromDictionary(dict[, nrows, ncols])`
 Converts a JavaScript object with entries for the form `"row,column"` into a sparse matrix.
 
 ### `CSRMatrix.fromDense(mat)`
