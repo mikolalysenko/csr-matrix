@@ -4,8 +4,9 @@ var numeric = require("numeric")
 var ndarray = require("ndarray")
 var cwise = require("cwise")
 var lowerBound = require("lower-bound")
+var almostEqual = require("almost-equal")
 
-var EPSILON = 1e-8
+var EPSILON = almostEqual.DBL_EPSILON
 
 function CSRMatrix(rows, row_ptrs, columns, column_ptrs, data) {
   this.rows = rows
@@ -249,7 +250,7 @@ var getComponents = cwise({
 })
 
 function fromNDArray(ndarr) {
-  return fromList(getComponents(ndarr, EPSILON), ndarr.shape[0], ndarr.shape[1])
+  return fromList(getComponents(ndarr), ndarr.shape[0], ndarr.shape[1])
 }
 
 function fromDense(mat) {

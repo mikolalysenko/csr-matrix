@@ -1,6 +1,6 @@
 {
   "name": "csr-matrix",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Compressed sparse row matrix class",
   "main": "csr.js",
   "directories": {
@@ -10,7 +10,8 @@
     "cwise": "~0.1.2",
     "numeric": "~1.2.6",
     "ndarray": "~0.2.0",
-    "lower-bound": "~0.0.1"
+    "lower-bound": "~0.0.1",
+    "almost-equal": "~0.0.0"
   },
   "devDependencies": {
     "tap": "~0.4.0"
