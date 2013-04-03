@@ -13,9 +13,11 @@ require("tap").test("csr", function(t) {
     t.equals(a.get(0,-1), 0)
     t.equals(a.get(-1, 0), 0)
     t.equals(a.get(-1, -1), 0)
-    t.equals(a.get(m.length, 0), 0)
-    t.equals(a.get(0, m[0].length), 0)
-    t.equals(a.get(m.length, m[0].length), 0)
+    if(m.length > 0) {
+      t.equals(a.get(m.length, 0), 0)
+      t.equals(a.get(0, m[0].length), 0)
+      t.equals(a.get(m.length, m[0].length), 0)
+    }
   }
 
   function checkMatrix(a) {
@@ -87,8 +89,9 @@ require("tap").test("csr", function(t) {
   
   checkConversions(CSRMatrix.fromDense([[1,2,3,4,5,6,7,8]]))
   checkConversions(CSRMatrix.fromDense([[1],[2],[3],[4],[5],[6],[7],[8]]))
-  checkConversions(CSRMatrix.fromDense([[1,2,3],[4,5,6],[7,8,9]]))
   checkConversions(CSRMatrix.fromDense([[1, 1, 0, 0, 2, 2, 0, 0, 3, 3]]))
+  checkConversions(CSRMatrix.fromDense([[1,2,3],[4,5,6],[7,8,9]]))
+
   
   t.end()
 })

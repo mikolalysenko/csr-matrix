@@ -80,22 +80,27 @@ CSRMatrix.prototype.get = function(i,j) {
   if(i < 0 || i >= this.rowCount || j < 0 || j >= this.columnCount) {
     return 0
   }
+  //console.log("test (" + i + "," + j + ")")
   var i0 = lowerBound(this.rows, i)
   if(i0 < 0 || this.rows[i0] !== i) {
+    //console.log("miss i", i0)
     return 0
   }
   var c_start = this.row_ptrs[i0]
     , c_end = this.row_ptrs[i0+1]
-    , j0 = lowerBound(this.columns, j, undefined, c_start, c_end)
-  if(j0 < c_start || j0 >= c_end) {
+    , j0 = lowerBound(this.columns, j, undefined, c_start, c_end-1)
+  if(j0 < c_start) {
+    //console.log("miss j", j0, c_start, c_end)
     return 0
   }
   var offset = j - this.columns[j0]
     , d_start = this.column_ptrs[j0]
     , d_end = this.column_ptrs[j0+1]
   if(d_start + offset >= d_end) {
+    //console.log("miss d", offset, d_start, d_end)
     return 0
   }
+  //console.log("hit", this.data[d_start+offset], i0, j0, offset)
   return this.data[d_start+offset]
 }
 
@@ -250,7 +255,7 @@ var getComponents = cwise({
 })
 
 function fromNDArray(ndarr) {
-  return fromList(getComponents(ndarr), ndarr.shape[0], ndarr.shape[1])
+  return fromList(getComponents(ndarr, EPSILON), ndarr.shape[0], ndarr.shape[1])
 }
 
 function fromDense(mat) {
