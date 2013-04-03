@@ -22,7 +22,7 @@ var M = CSRMatrix.fromDictionary(dict, 4, 5)
 console.log(M.apply([1,2,3,4,5]))
 ```
 
-## Matrix-Vector Product
+## CSRMatrix
 CSRMatrices are optimized for exactly one thing:  fast matrix-vector multiplies.  The way you do this is by calling the following method:
 
 ### `matrix.apply(vector[, result])`
@@ -35,6 +35,9 @@ Returns the resulting product
 
 ### `matrix.transpose()`
 Returns the transpose of the matrix
+
+### `matrix.get(i,j)`
+Returns the i,j-th entry of the matrix
 
 ### `matrix.rowCount`
 Returns the number of rows

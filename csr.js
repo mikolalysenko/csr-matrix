@@ -3,6 +3,7 @@
 var numeric = require("numeric")
 var ndarray = require("ndarray")
 var cwise = require("cwise")
+var lowerBound = require("lower-bound")
 
 var EPSILON = 1e-8
 
@@ -73,6 +74,30 @@ CSRMatrix.prototype.transpose = function() {
   }
   return fromList(items, this.columnCount, this.rowCount)
 }
+
+CSRMatrix.prototype.get = function(i,j) {
+  if(i < 0 || i >= this.rowCount || j < 0 || j >= this.columnCount) {
+    return 0
+  }
+  var i0 = lowerBound(this.rows, i)
+  if(i0 < 0 || this.rows[i0] !== i) {
+    return 0
+  }
+  var c_start = this.row_ptrs[i0]
+    , c_end = this.row_ptrs[i0+1]
+    , j0 = lowerBound(this.columns, j, undefined, c_start, c_end)
+  if(j0 < c_start || j0 >= c_end) {
+    return 0
+  }
+  var offset = j - this.columns[j0]
+    , d_start = this.column_ptrs[j0]
+    , d_end = this.column_ptrs[j0+1]
+  if(d_start + offset >= d_end) {
+    return 0
+  }
+  return this.data[d_start+offset]
+}
+
 
 CSRMatrix.prototype.toList = function() {
   var result = []
