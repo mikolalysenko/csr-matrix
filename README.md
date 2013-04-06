@@ -43,6 +43,7 @@ Returns the i,j-th entry of the matrix
 Returns the number of rows
 
 ### `matrix.columnCount`
+Returns the number of columns
 
 ### `matrix.toList()`
 Converts matrix into a list format
