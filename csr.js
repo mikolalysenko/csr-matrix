@@ -55,10 +55,10 @@ function applyImpl(rows, row_ptrs, columns, column_ptrs, data, vector, result) {
 CSRMatrix.prototype.apply = function(vector, result) {
   if(!result) {
     result = new Float64Array(this.rowCount)
-  } else if(result.length !== this.rowCount) {
+  } else if(result.length < this.rowCount) {
     throw new Error("Result vector shape mismatch")
   }
-  if(vector.length !== this.columnCount) {
+  if(vector.length < this.columnCount) {
     throw new Error("Input vector shape mismatch")
   }
   applyImpl(this.rows, this.row_ptrs, this.columns, this.column_ptrs, this.data, vector, result)
