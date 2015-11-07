@@ -1,23 +1,20 @@
 {
   "name": "csr-matrix",
-  "version": "0.1.4",
+  "version": "1.0.0",
   "description": "Compressed sparse row matrix class",
   "main": "csr.js",
   "directories": {
     "test": "test"
   },
   "dependencies": {
-    "cwise": "~0.1.2",
-    "numeric": "~1.2.6",
-    "ndarray": "~0.2.0",
-    "lower-bound": "~0.0.1",
-    "almost-equal": "~0.0.0"
+    "almost-equal": "^1.0.0",
+    "binary-search": "^1.2.0",
+    "dup": "^1.0.0",
+    "tape": "^4.2.2"
   },
-  "devDependencies": {
-    "tap": "~0.4.0"
-  },
+  "devDependencies": {},
   "scripts": {
-    "test": "tap test/*.js"
+    "test": "tape test/*.js"
   },
   "repository": {
     "type": "git",

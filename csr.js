@@ -1,10 +1,15 @@
 "use strict"
 
-var numeric = require("numeric")
-var ndarray = require("ndarray")
-var cwise = require("cwise")
-var lowerBound = require("lower-bound")
-var almostEqual = require("almost-equal")
+var bsearch     = require('binary-search')
+var almostEqual = require('almost-equal')
+var dup         = require('dup')
+
+module.exports = {
+  fromList:       fromList,
+  fromDictionary: fromDictionary,
+  fromDense:      fromDense,
+  fromNDArray:    fromNDArray
+}
 
 var EPSILON = almostEqual.DBL_EPSILON
 
@@ -16,13 +21,15 @@ function CSRMatrix(rows, row_ptrs, columns, column_ptrs, data) {
   this.data = data
 }
 
-Object.defineProperty(CSRMatrix.prototype, "rowCount", {
+var proto = CSRMatrix.prototype
+
+Object.defineProperty(proto, "rowCount", {
   get: function() {
     return this.rows[this.rows.length-1]
   }
 })
 
-Object.defineProperty(CSRMatrix.prototype, "columnCount", {
+Object.defineProperty(proto, "columnCount", {
   get: function() {
     return this.columns[this.columns.length-1]
   }
@@ -52,20 +59,19 @@ function applyImpl(rows, row_ptrs, columns, column_ptrs, data, vector, result) {
   }
 }
 
-CSRMatrix.prototype.apply = function(vector, result) {
-  if(!result) {
-    result = new Float64Array(this.rowCount)
-  } else if(result.length < this.rowCount) {
-    throw new Error("Result vector shape mismatch")
-  }
-  if(vector.length < this.columnCount) {
-    throw new Error("Input vector shape mismatch")
-  }
-  applyImpl(this.rows, this.row_ptrs, this.columns, this.column_ptrs, this.data, vector, result)
+proto.apply = function(vector, result) {
+  applyImpl(
+    this.rows,
+    this.row_ptrs,
+    this.columns,
+    this.column_ptrs,
+    this.data,
+    vector,
+    result)
   return result
 }
 
-CSRMatrix.prototype.transpose = function() {
+proto.transpose = function() {
   var items = this.toList()
   for(var i=0; i<items.length; ++i) {
     var it = items[i]
@@ -76,36 +82,31 @@ CSRMatrix.prototype.transpose = function() {
   return fromList(items, this.columnCount, this.rowCount)
 }
 
-CSRMatrix.prototype.get = function(i,j) {
+proto.get = function(i,j) {
   if(i < 0 || i >= this.rowCount || j < 0 || j >= this.columnCount) {
     return 0
   }
-  //console.log("test (" + i + "," + j + ")")
-  var i0 = lowerBound(this.rows, i)
+  var i0 = bsearch.le(this.rows, i)
   if(i0 < 0 || this.rows[i0] !== i) {
-    //console.log("miss i", i0)
     return 0
   }
   var c_start = this.row_ptrs[i0]
     , c_end = this.row_ptrs[i0+1]
-    , j0 = lowerBound(this.columns, j, undefined, c_start, c_end-1)
+    , j0 = bsearch.le(this.columns, j, undefined, c_start, c_end-1)
   if(j0 < c_start) {
-    //console.log("miss j", j0, c_start, c_end)
     return 0
   }
   var offset = j - this.columns[j0]
     , d_start = this.column_ptrs[j0]
     , d_end = this.column_ptrs[j0+1]
   if(d_start + offset >= d_end) {
-    //console.log("miss d", offset, d_start, d_end)
     return 0
   }
-  //console.log("hit", this.data[d_start+offset], i0, j0, offset)
   return this.data[d_start+offset]
 }
 
 
-CSRMatrix.prototype.toList = function() {
+proto.toList = function() {
   var result = []
   for(var i=0, ilen=this.rows.length-1; i<ilen; ++i) {
     var r = this.rows[i];
@@ -120,7 +121,7 @@ CSRMatrix.prototype.toList = function() {
   return result
 }
 
-CSRMatrix.prototype.toDictionary = function() {
+proto.toDictionary = function() {
   var result = {}
   for(var i=0, ilen=this.rows.length-1; i<ilen; ++i) {
     var r = this.rows[i];
@@ -135,8 +136,8 @@ CSRMatrix.prototype.toDictionary = function() {
   return result
 }
 
-CSRMatrix.prototype.toDense = function() {
-  var result = numeric.rep([this.rowCount, this.columnCount], 0.0)
+proto.toDense = function() {
+  var result = dup([this.rowCount, this.columnCount], 0.0)
   for(var i=0, ilen=this.rows.length-1; i<ilen; ++i) {
     var r = this.rows[i];
     for(var j=this.row_ptrs[i], jlen=this.row_ptrs[i+1]; j<jlen; ++j) {
@@ -150,8 +151,7 @@ CSRMatrix.prototype.toDense = function() {
   return result
 }
 
-CSRMatrix.prototype.toNDArray = function() {
-  var result = ndarray.zeros([this.rowCount, this.columnCount])
+CSRMatrix.prototype.toNDArray = function(result) {
   for(var i=0, ilen=this.rows.length-1; i<ilen; ++i) {
     var r = this.rows[i];
     for(var j=this.row_ptrs[i], jlen=this.row_ptrs[i+1]; j<jlen; ++j) {
@@ -166,9 +166,7 @@ CSRMatrix.prototype.toNDArray = function() {
 }
 
 function compareKey(a, b) {
-  var d = a[0] - b[0]
-  if(d) { return d }
-  return a[1] - b[1]
+  return (a[0]-b[0]) || (a[1]-b[1])
 }
 
 function removeDuplicates(items, nrows, ncols) {
@@ -226,54 +224,48 @@ function fromList(items, nrows, ncols) {
     data)
 }
 
-function fromDictionary(dict, nrows, ncols) {
-  var keys = Object.keys(dict)
-    , items = new Array(keys.length)
-    , i=0, v, k
-  for(i=keys.length-1; i>=0; --i) {
-    k = keys[i]
-    v = k.split(',')
-    items[i] = [parseInt(v[0]), parseInt(v[1]), dict[k]]
-  }
-  return fromList(items, nrows, ncols)
+function fromDictionary(dict, rows, cols) {
+  return fromList(Object.keys(dict).map(function(item) {
+    var parts = item.split(',')
+    return [parts[0]|0, parts[1]|0, dict[item]]
+  }, rows, cols)
 }
 
-var getComponents = cwise({
-  args: ["array", "index", "scalar"],
-  pre: function() {
-    this.items = []
-    this.abs = Math.abs
-  },
-  body: function(a, i, EPSILON) {
-    if(this.abs(a) > EPSILON) {
-      this.items.push([i[0], i[1], a])
-    }
-  },
-  post: function() {
-    return this.items
+function fromDense(matrix) {
+  var list = []
+  var rows = matrix.length
+  if(rows === 0) {
+    return fromList([], 0, 0)
   }
-})
-
-function fromNDArray(ndarr) {
-  return fromList(getComponents(ndarr, EPSILON), ndarr.shape[0], ndarr.shape[1])
-}
-
-function fromDense(mat) {
-  var items = []
-  for(var i=0, ilen=mat.length; i<ilen; ++i) {
-    var r = mat[i]
-    for(var j=0, jlen=r.length; j<jlen; ++j) {
-      if(Math.abs(r[j]) > EPSILON) {
-        items.push([i,j,r[j]])
+  var cols = matrix[0].length
+  for(var i=0; i<rows; ++i) {
+    var row = matrix[i]
+    for(var j=0; j<cols; ++j) {
+      var v = row[j]
+      if(Math.abs(v) > EPSILON) {
+        list.push([i,j,v])
       }
     }
   }
-  return fromList(items, mat.length, mat.length > 0 ? mat[0].length : 0)
+  return fromList(list, rows, cols)
 }
 
-CSRMatrix.fromList = fromList
-CSRMatrix.fromDictionary = fromDictionary
-CSRMatrix.fromNDArray = fromNDArray
-CSRMatrix.fromDense = fromDense
-module.exports = CSRMatrix
-
+function fromNDArray(array) {
+  var list = []
+  var rows = array.shape[0]
+  var cols = array.shape[1]
+  if(array.stride[1] > array.stride[0]) {
+    for(var j=0; j<cols; ++j) {
+      for(var i=0; i<rows; ++i) {
+        list.push([i, j, array.get(i,j)])
+      }
+    }
+  } else {
+    for(var i=0; i<rows; ++i) {
+      for(var j=0; j<cols; ++j) {
+        list.push([i, j, array.get(i,j)])
+      }
+    }
+  }
+  return fromList(list, rows, cols)
+}

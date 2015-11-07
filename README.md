@@ -2,13 +2,14 @@ csr-matrix
 ===========
 A very minimal [incremental compressed sparse row](http://en.wikipedia.org/wiki/Sparse_matrix#Compressed_sparse_row_.28CSR_or_CRS.29) matrix library for JavaScript.
 
-Usage
-=====
-First install using npm:
 
-    npm install csr-matrix
+# Install
 
-Then you can create a matrix and apply it to a vector like this:
+```
+npm i csr-matrix
+```
+
+# Example
 
 ```javascript
 var dict = {}
@@ -19,13 +20,30 @@ dict[[3,4]] = 5
 var CSRMatrix = require("csr-matrix")
 
 var M = CSRMatrix.fromDictionary(dict, 4, 5)
-console.log(M.apply([1,2,3,4,5]))
+console.log(M.apply([1,2,3,4,5], []))
 ```
 
-## CSRMatrix
+# API
 CSRMatrices are optimized for exactly one thing:  fast matrix-vector multiplies.  The way you do this is by calling the following method:
 
-### `matrix.apply(vector[, result])`
+## Constructors
+There are several ways to create csr-matrices.  The most direct way to do this is to just call the constructor yourself:
+
+#### `CSRMatrix.fromList(items[, nrows, ncols])`
+Turns an array of entries of the form `[row, column, value]` into a sparse matrix.  Note that if there are some zero rows or columns at the end of the matrix, you need to specify the number of rows/columns in the optional nrows/ncols arguments.
+
+#### `CSRMatrix.fromDictionary(dict[, nrows, ncols])`
+Converts a JavaScript object with entries for the form `"row,column"` into a sparse matrix.
+
+#### `CSRMatrix.fromDense(mat)`
+Turns an array-of-arrays into a csr matrix
+
+#### `CSRMatrix.fromNDArray(ndarr)`
+Turns a 2D dimensional [ndarray](https://github.com/scijs/ndarray) into a csr matrix
+
+## Method
+
+#### `matrix.apply(vector[, result])`
 This computes the normal matrix-vector product, but is often much faster than a dense multiply since the matrix is stored in a compressed sparse format.
 
 * `vector` is the vector to be multiplied
@@ -33,56 +51,31 @@ This computes the normal matrix-vector product, but is often much faster than a 
 
 Returns the resulting product
 
-### `matrix.transpose()`
+#### `matrix.transpose()`
 Returns the transpose of the matrix
 
-### `matrix.get(i,j)`
+#### `matrix.get(i,j)`
 Returns the i,j-th entry of the matrix
 
-### `matrix.rowCount`
+#### `matrix.rowCount`
 Returns the number of rows
 
-### `matrix.columnCount`
+#### `matrix.columnCount`
 Returns the number of columns
 
-### `matrix.toList()`
+#### `matrix.toList()`
 Converts matrix into a list format
 
-### `matrix.toDictionary()`
+#### `matrix.toDictionary()`
 Converts matrix into hash table
 
-### `matrix.toDense()`
+#### `matrix.toDense()`
 Converts matrix into array of arrays
 
-### `matrix.toNDArray()`
+#### `matrix.toNDArray(out)`
 Converts matrix into ndarray
 
-## Constructors
-There are several ways to create csr-matrices.  The most direct way to do this is to just call the constructor yourself:
+* `out` is the output ndarray
 
-### `CSRMatrix(rows, row_ptrs, columns, column_ptrs, data)`
-Where:
-
-* `rows` is an array of row indices
-* `row_ptrs` is an array of pointers to the start of each row
-* `columns` is an array of column names
-* `column_data` is a pointer to the start of each column's run
-* `data` is an array of all the entries of the matrix stored left-to-right and top-to-bottom
-
-Calling this method directly is not advised.  Instead, you should use one of the more user-friendly constructors:
-
-### `CSRMatrix.fromList(items[, nrows, ncols])`
-Turns an array of entries of the form `[row, column, value]` into a sparse matrix.  Note that if there are some zero rows or columns at the end of the matrix, you need to specify the number of rows/columns in the optional nrows/ncols arguments.
-
-### `CSRMatrix.fromDictionary(dict[, nrows, ncols])`
-Converts a JavaScript object with entries for the form `"row,column"` into a sparse matrix.
-
-### `CSRMatrix.fromDense(mat)`
-Turns an array-of-arrays into a csr matrix
-
-### `CSRMatrix.fromNDArray(ndarr)`
-Turns a 2D dimensional [ndarray](https://github.com/mikolalysenko/ndarray) into a csr matrix
-
-Credits
-=======
-(c) 2013 Mikola Lysenko. BSD
+# Credits
+(c) 2013-2015 Mikola Lysenko. BSD
