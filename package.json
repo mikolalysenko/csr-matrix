@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "almost-equal": "^1.0.0",
-    "binary-search": "^1.2.0",
+    "binary-search-bounds": "^2.0.3",
     "dup": "^1.0.0",
     "tape": "^4.2.2"
   },
@@ -34,7 +34,7 @@
     "math"
   ],
   "author": "Mikola Lysenko",
-  "license": "BSD",
+  "license": "MIT",
   "readmeFilename": "README.md",
   "gitHead": "595d6d25ee89a767157613562c59e6ff12567f58"
 }

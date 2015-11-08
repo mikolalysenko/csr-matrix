@@ -1,6 +1,5 @@
 "use strict"
 
-var bsearch     = require('binary-search')
 var almostEqual = require('almost-equal')
 var dup         = require('dup')
 
@@ -81,30 +80,6 @@ proto.transpose = function() {
   }
   return fromList(items, this.columnCount, this.rowCount)
 }
-
-proto.get = function(i,j) {
-  if(i < 0 || i >= this.rowCount || j < 0 || j >= this.columnCount) {
-    return 0
-  }
-  var i0 = bsearch.le(this.rows, i)
-  if(i0 < 0 || this.rows[i0] !== i) {
-    return 0
-  }
-  var c_start = this.row_ptrs[i0]
-    , c_end = this.row_ptrs[i0+1]
-    , j0 = bsearch.le(this.columns, j, undefined, c_start, c_end-1)
-  if(j0 < c_start) {
-    return 0
-  }
-  var offset = j - this.columns[j0]
-    , d_start = this.column_ptrs[j0]
-    , d_end = this.column_ptrs[j0+1]
-  if(d_start + offset >= d_end) {
-    return 0
-  }
-  return this.data[d_start+offset]
-}
-
 
 proto.toList = function() {
   var result = []
@@ -228,7 +203,7 @@ function fromDictionary(dict, rows, cols) {
   return fromList(Object.keys(dict).map(function(item) {
     var parts = item.split(',')
     return [parts[0]|0, parts[1]|0, dict[item]]
-  }, rows, cols)
+  }), rows, cols)
 }
 
 function fromDense(matrix) {

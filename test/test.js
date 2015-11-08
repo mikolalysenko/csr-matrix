@@ -2,23 +2,6 @@ var CSRMatrix = require("../csr.js")
 
 require("tape")("csr", function(t) {
 
-  function checkGet(a) {
-    var m = a.toDense()
-    for(var i=0; i<m.length; ++i) {
-      for(var j=0; j<m[i].length; ++j) {
-        t.equals(a.get(i,j), m[i][j])
-      }
-    }
-    t.equals(a.get(0,-1), 0)
-    t.equals(a.get(-1, 0), 0)
-    t.equals(a.get(-1, -1), 0)
-    if(m.length > 0) {
-      t.equals(a.get(m.length, 0), 0)
-      t.equals(a.get(0, m[0].length), 0)
-      t.equals(a.get(m.length, m[0].length), 0)
-    }
-  }
-
   function checkMatrix(a) {
     t.equals(a.rows.length, a.row_ptrs.length)
     t.equals(a.columns.length, a.column_ptrs.length)
@@ -35,8 +18,6 @@ require("tape")("csr", function(t) {
       t.assert(a.column_ptrs[i-1] < a.column_ptrs[i])
     }
     t.equals(a.columnCount, a.columns[a.columns.length-1])
-
-    checkGet(a)
   }
 
   function checkEqual(a, b) {
@@ -61,14 +42,18 @@ require("tape")("csr", function(t) {
   }
 
   function checkConversions(a) {
-    checkEqual(a, CSRMatrix(a.toList(), a.rowCount, a.columnCount))
+    checkEqual(a, CSRMatrix.fromList(a.toList(), a.rowCount, a.columnCount))
   }
 
   function checkApply(m, v, expected) {
-    var result = m.apply(v)
+    var result = new Array(expected.length)
+    for(var i=0; i<expected.length; ++i) {
+      result[i] = 0
+    }
+    m.apply(v, result)
     t.equals(result.length, expected.length)
     for(var i=0; i<result.length; ++i) {
-      t.equals(result[i], expected[i])
+      t.equals(result[i], expected[i], 'apply[' + i + ']')
     }
   }
 
@@ -87,7 +72,6 @@ require("tape")("csr", function(t) {
   checkConversions(CSRMatrix.fromDense([[1],[2],[3],[4],[5],[6],[7],[8]]))
   checkConversions(CSRMatrix.fromDense([[1, 1, 0, 0, 2, 2, 0, 0, 3, 3]]))
   checkConversions(CSRMatrix.fromDense([[1,2,3],[4,5,6],[7,8,9]]))
-
 
   t.end()
 })

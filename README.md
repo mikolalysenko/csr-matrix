@@ -54,9 +54,6 @@ Returns the resulting product
 #### `matrix.transpose()`
 Returns the transpose of the matrix
 
-#### `matrix.get(i,j)`
-Returns the i,j-th entry of the matrix
-
 #### `matrix.rowCount`
 Returns the number of rows
 
